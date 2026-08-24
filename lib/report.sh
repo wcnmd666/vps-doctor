@@ -6,6 +6,19 @@ rd_json_escape() {
   printf '%s' "$s"
 }
 
+rd_save_report() {
+  local tmp="$1" target="$2"
+  mkdir -p "$(dirname "$target")"
+  mv "$tmp" "$target"
+
+  # mktemp creates mode 0600 files. When the scan is run through sudo,
+  # return ownership to the invoking user so the report can be validated,
+  # uploaded, or shared without weakening its private permissions.
+  if [[ -n "${SUDO_UID:-}" && -n "${SUDO_GID:-}" ]]; then
+    chown "${SUDO_UID}:${SUDO_GID}" "$target" 2>/dev/null || true
+  fi
+}
+
 rd_report_terminal() {
   local i last_category="" category score_color
   if ((RD_SCORE >= 75)); then score_color=32; elif ((RD_SCORE >= 50)); then score_color=33; else score_color=31; fi
@@ -46,7 +59,7 @@ rd_report_json() {
     done
     printf '\n  ]\n}\n'
   } >"$tmp"
-  if [[ "$target" == "-" ]]; then content="$(<"$tmp")"; printf '%s\n' "$content"; rm -f "$tmp"; else mkdir -p "$(dirname "$target")"; mv "$tmp" "$target"; fi
+  if [[ "$target" == "-" ]]; then content="$(<"$tmp")"; printf '%s\n' "$content"; rm -f "$tmp"; else rd_save_report "$tmp" "$target"; fi
 }
 
 rd_report_markdown() {
@@ -68,5 +81,5 @@ rd_report_markdown() {
       printf '\n'
     done
   } >"$tmp"
-  if [[ "$target" == "-" ]]; then content="$(<"$tmp")"; printf '%s\n' "$content"; rm -f "$tmp"; else mkdir -p "$(dirname "$target")"; mv "$tmp" "$target"; fi
+  if [[ "$target" == "-" ]]; then content="$(<"$tmp")"; printf '%s\n' "$content"; rm -f "$tmp"; else rd_save_report "$tmp" "$target"; fi
 }
