@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+
+set -uo pipefail
+
+VERSION="0.1.0"
+SOURCE="${BASH_SOURCE[0]}"
+while [[ -h "$SOURCE" ]]; do
+  SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" >/dev/null 2>&1 && pwd)"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ "$SOURCE" != /* ]] && SOURCE="$SCRIPT_DIR/$SOURCE"
+done
+ROOT_DIR="$(cd -P "$(dirname "$SOURCE")/.." >/dev/null 2>&1 && pwd)"
+
+# shellcheck source=lib/core.sh
+source "$ROOT_DIR/lib/core.sh"
+# shellcheck source=lib/results.sh
+source "$ROOT_DIR/lib/results.sh"
+# shellcheck source=lib/report.sh
+source "$ROOT_DIR/lib/report.sh"
+# shellcheck source=checks/system.sh
+source "$ROOT_DIR/checks/system.sh"
+# shellcheck source=checks/storage.sh
+source "$ROOT_DIR/checks/storage.sh"
+# shellcheck source=checks/memory.sh
+source "$ROOT_DIR/checks/memory.sh"
+# shellcheck source=checks/services.sh
+source "$ROOT_DIR/checks/services.sh"
+# shellcheck source=checks/network.sh
+source "$ROOT_DIR/checks/network.sh"
+# shellcheck source=checks/security.sh
+source "$ROOT_DIR/checks/security.sh"
+# shellcheck source=checks/docker.sh
+source "$ROOT_DIR/checks/docker.sh"
+# shellcheck source=checks/web.sh
+source "$ROOT_DIR/checks/web.sh"
+# shellcheck source=fixes/actions.sh
+source "$ROOT_DIR/fixes/actions.sh"
+
+usage() {
+  cat <<'EOF'
+VPS Doctor — explain common Linux server failures in one command.
+
+Usage:
+  vps-doctor scan [options]       Run a read-only health scan (default)
+  vps-doctor fix <action>         Run one guarded repair action
+  vps-doctor fixes                List available repair actions
+  vps-doctor rules                List diagnostic rules
+  vps-doctor version              Print version
+
+Scan options:
+  --format terminal|json|markdown Output format (default: terminal)
+  --output PATH                   Write JSON/Markdown report to PATH
+  --quick                         Skip slower web and log checks
+  --no-color                      Disable ANSI colors
+  --fail-under SCORE              Exit 2 when health score is below SCORE
+  --config PATH                   Load an alternate config file
+
+Fix options:
+  --yes                           Skip the confirmation prompt
+  --dry-run                       Show commands without changing the system
+
+Examples:
+  vps-doctor scan
+  vps-doctor scan --format json --output report.json
+  vps-doctor fix vacuum-journal --dry-run
+EOF
+}
+
+run_scan() {
+  local format="terminal" output="" quick=0 fail_under="" config=""
+  while (($#)); do
+    case "$1" in
+      --format) format="${2:-}"; shift 2 ;;
+      --output) output="${2:-}"; shift 2 ;;
+      --quick) quick=1; shift ;;
+      --no-color) RD_COLOR=0; shift ;;
+      --fail-under) fail_under="${2:-}"; shift 2 ;;
+      --config) config="${2:-}"; shift 2 ;;
+      -h|--help) usage; return 0 ;;
+      *) rd_die "Unknown scan option: $1" ;;
+    esac
+  done
+
+  case "$format" in terminal|json|markdown) ;; *) rd_die "Unsupported format: $format" ;; esac
+  [[ -z "$fail_under" || "$fail_under" =~ ^[0-9]+$ ]] || rd_die "--fail-under must be an integer"
+  [[ -z "$config" || -r "$config" ]] || rd_die "Cannot read config: $config"
+
+  rd_load_config "$config"
+  rd_results_reset
+  RD_QUICK="$quick"
+  RD_STARTED_AT="$(rd_timestamp)"
+  RD_HOSTNAME="$(hostname 2>/dev/null || printf unknown)"
+
+  check_system
+  check_storage
+  check_memory
+  check_services
+  check_network
+  check_security
+  check_docker
+  check_web
+  rd_finalize_score
+
+  case "$format" in
+    terminal) rd_report_terminal ;;
+    json) rd_report_json "${output:--}" ;;
+    markdown) rd_report_markdown "${output:--}" ;;
+  esac
+
+  if [[ -n "$output" && "$format" == "terminal" ]]; then
+    rd_report_json "$output"
+    rd_info "Machine-readable report written to $output"
+  fi
+
+  if [[ -n "$fail_under" ]] && ((RD_SCORE < fail_under)); then
+    return 2
+  fi
+}
+
+command="${1:-scan}"
+[[ $# -gt 0 ]] && shift
+case "$command" in
+  scan|doctor) run_scan "$@" ;;
+  fix) rd_run_fix "${1:-}" "${@:2}" ;;
+  fixes) rd_list_fixes ;;
+  rules) rd_list_rules ;;
+  version|-v|--version) printf 'vps-doctor %s\n' "$VERSION" ;;
+  help|-h|--help) usage ;;
+  *) rd_die "Unknown command: $command (try: vps-doctor help)" ;;
+esac

@@ -1,0 +1,4 @@
+* text=auto eol=lf
+*.sh text eol=lf
+bin/vps-doctor text eol=lf
+*.svg text eol=lf

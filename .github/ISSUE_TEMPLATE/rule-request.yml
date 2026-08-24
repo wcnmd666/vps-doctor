@@ -1,0 +1,31 @@
+name: Diagnostic rule request
+description: Propose a read-only, evidence-backed check
+title: "[rule] "
+labels: [enhancement, rule]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Operator problem
+      description: What real incident or maintenance burden does this detect?
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Read-only evidence
+      description: Which command or file proves the condition, and what permissions does it need?
+    validations:
+      required: true
+  - type: textarea
+    id: falsepositives
+    attributes:
+      label: False positives and unsupported environments
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: Reproducible test idea
+    validations:
+      required: true

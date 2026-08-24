@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Bash ${{ matrix.bash }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        bash: ['4.4', '5.2']
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax check and unit tests
+        run: >-
+          docker run --rm
+          -v "$PWD:/work"
+          -w /work
+          bash:${{ matrix.bash }}
+          -c "apk add --no-cache coreutils findutils grep sed gawk util-linux >/dev/null &&
+          bash -n bin/vps-doctor install.sh uninstall.sh lib/*.sh checks/*.sh fixes/*.sh tests/*.sh scripts/*.sh &&
+          bash tests/run.sh"
+
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ShellCheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - name: Lint
+        run: shellcheck -x bin/vps-doctor install.sh uninstall.sh lib/*.sh checks/*.sh fixes/*.sh tests/*.sh scripts/*.sh
+
+  smoke:
+    name: Ubuntu smoke scan
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run read-only quick scan
+        run: sudo bash bin/vps-doctor scan --quick --no-color --format json --output report.json
+      - name: Validate JSON
+        run: python3 -m json.tool report.json >/dev/null
+      - uses: actions/upload-artifact@v4
+        with:
+          name: smoke-report
+          path: report.json

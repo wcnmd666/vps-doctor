@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="520" viewBox="0 0 1000 520" role="img" aria-labelledby="title desc">
+  <title id="title">VPS Doctor sample terminal report</title>
+  <desc id="desc">A dark terminal displaying an explainable server health score and findings.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#020617"/><stop offset="1" stop-color="#172554"/></linearGradient>
+    <filter id="shadow"><feDropShadow dx="0" dy="18" stdDeviation="18" flood-opacity=".28"/></filter>
+  </defs>
+  <rect width="1000" height="520" rx="28" fill="#f8fafc"/>
+  <rect x="45" y="35" width="910" height="450" rx="18" fill="url(#bg)" filter="url(#shadow)"/>
+  <rect x="45" y="35" width="910" height="52" rx="18" fill="#1e293b"/>
+  <rect x="45" y="69" width="910" height="18" fill="#1e293b"/>
+  <circle cx="78" cy="61" r="7" fill="#fb7185"/><circle cx="102" cy="61" r="7" fill="#fbbf24"/><circle cx="126" cy="61" r="7" fill="#34d399"/>
+  <text x="500" y="67" fill="#94a3b8" text-anchor="middle" font-family="ui-monospace,Consolas,monospace" font-size="15">root@demo — vps-doctor scan</text>
+  <g font-family="ui-monospace,Consolas,monospace" font-size="18">
+    <text x="80" y="125" fill="#67e8f9" font-weight="700">VPS Doctor — Read-only server health assessment</text>
+    <text x="80" y="159" fill="#cbd5e1">Health score:</text><text x="236" y="159" fill="#fbbf24" font-weight="700">68/100  Grade C</text>
+    <text x="80" y="189" fill="#94a3b8">16 pass · 3 warning · 1 failure · 4 info</text>
+    <text x="80" y="233" fill="#e2e8f0" font-weight="700">[Storage]</text>
+    <text x="80" y="263" fill="#fb7185">FAIL</text><text x="145" y="263" fill="#93c5fd">STO-001</text><text x="260" y="263" fill="#e2e8f0">Root filesystem usage — 96% full</text>
+    <text x="112" y="293" fill="#94a3b8">↳ Free space immediately; full disks can corrupt services.</text>
+    <text x="80" y="337" fill="#e2e8f0" font-weight="700">[Containers]</text>
+    <text x="80" y="367" fill="#fbbf24">WARN</text><text x="145" y="367" fill="#93c5fd">CTR-003</text><text x="260" y="367" fill="#e2e8f0">2 Docker logs exceed 100 MiB</text>
+    <text x="112" y="397" fill="#94a3b8">Fix: sudo vps-doctor fix configure-docker-logs</text>
+    <text x="80" y="447" fill="#34d399">✓ No changes were made. Evidence before action.</text>
+  </g>
+</svg>
