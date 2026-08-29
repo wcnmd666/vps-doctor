@@ -2,10 +2,11 @@
 
 check_memory() {
   local total=0 available=0 swap=0 pct=0 oom_count=0
-  if [[ -r /proc/meminfo ]]; then
-    total="$(awk '/^MemTotal:/ {print $2}' /proc/meminfo)"
-    available="$(awk '/^MemAvailable:/ {print $2}' /proc/meminfo)"
-    swap="$(awk '/^SwapTotal:/ {print $2}' /proc/meminfo)"
+  local proc_root="${RD_PROC_ROOT:-/proc}"
+  if [[ -r "$proc_root/meminfo" ]]; then
+    total="$(awk '/^MemTotal:/ {print $2}' "$proc_root/meminfo")"
+    available="$(awk '/^MemAvailable:/ {print $2}' "$proc_root/meminfo")"
+    swap="$(awk '/^SwapTotal:/ {print $2}' "$proc_root/meminfo")"
   fi
   [[ "$total" =~ ^[0-9]+$ && "$total" -gt 0 ]] && pct=$((available * 100 / total))
   if ((pct < RD_MEMORY_WARN)); then
