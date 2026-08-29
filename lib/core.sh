@@ -13,6 +13,7 @@ RD_DISK_WARN="85"
 RD_DISK_FAIL="95"
 RD_MEMORY_WARN="15"
 RD_AUTH_FAILURE_WARN="100"
+declare -Ag RD_EXCLUSIONS=()
 
 if [[ ! -t 1 || "${NO_COLOR:-}" != "" ]]; then RD_COLOR=0; fi
 
@@ -56,8 +57,36 @@ rd_valid_positive_integer() {
   [[ "$value" =~ ^[0-9]+$ ]] && ((value >= 1))
 }
 
+rd_parse_exclusions() {
+  local raw="${1:-}" source="${2:-config}" entry id reason
+  local -a entries=()
+  RD_EXCLUSIONS=()
+  [[ -n "$raw" ]] || return 0
+
+  IFS=';' read -r -a entries <<<"$raw"
+  for entry in "${entries[@]}"; do
+    entry="$(rd_trim "$entry")"
+    [[ -n "$entry" ]] || continue
+    if [[ "$entry" != *=* ]]; then
+      rd_warn "Ignoring malformed rule exclusion in $source: $entry (expected RULE-ID=reason)"
+      continue
+    fi
+    id="$(rd_trim "${entry%%=*}")"
+    reason="$(rd_trim "${entry#*=}")"
+    if ! declare -F rd_known_rule_id >/dev/null || ! rd_known_rule_id "$id"; then
+      rd_warn "Ignoring unknown rule exclusion in $source: $id"
+      continue
+    fi
+    if [[ -z "$reason" ]]; then
+      rd_warn "Ignoring rule exclusion without a reason in $source: $id"
+      continue
+    fi
+    RD_EXCLUSIONS["$id"]="$reason"
+  done
+}
+
 rd_load_config() {
-  local requested="${1:-}" candidate value
+  local requested="${1:-}" candidate value exclusions
   local disk_warn disk_fail memory_warn auth_failure_warn
 
   for candidate in "$requested" "${VPS_DOCTOR_CONFIG:-}" "/etc/vps-doctor/config.conf" "$ROOT_DIR/config/vps-doctor.conf"; do
@@ -71,6 +100,7 @@ rd_load_config() {
     disk_fail="$(rd_config_value "$candidate" DISK_FAIL || true)"
     memory_warn="$(rd_config_value "$candidate" MEMORY_WARN || true)"
     auth_failure_warn="$(rd_config_value "$candidate" AUTH_FAILURE_WARN || true)"
+    exclusions="$(rd_config_value "$candidate" EXCLUDE_RULES || true)"
 
     if [[ -n "$disk_warn" || -n "$disk_fail" ]]; then
       [[ -n "$disk_warn" ]] || disk_warn="$RD_DISK_WARN"
@@ -99,6 +129,7 @@ rd_load_config() {
       fi
     fi
 
+    rd_parse_exclusions "$exclusions" "$candidate"
     return 0
   done
 }
