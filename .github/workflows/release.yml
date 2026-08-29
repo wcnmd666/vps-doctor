@@ -7,13 +7,27 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   release:
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       - name: Test and package
         run: make package
+      - name: Verify package integrity
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd dist
+          sha256sum -c SHA256SUMS
+          archive="$(awk '{print $2}' SHA256SUMS | head -n1)"
+          [[ -n "$archive" && -f "$archive" ]]
+          tar -tzf "$archive" >/dev/null
       - name: Publish release artifacts
         env:
           GH_TOKEN: ${{ github.token }}
