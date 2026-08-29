@@ -46,16 +46,59 @@ rd_config_value() {
   printf '%s' "$line"
 }
 
+rd_valid_percent() {
+  local value="${1:-}"
+  [[ "$value" =~ ^[0-9]+$ ]] && ((value >= 1 && value <= 100))
+}
+
+rd_valid_positive_integer() {
+  local value="${1:-}"
+  [[ "$value" =~ ^[0-9]+$ ]] && ((value >= 1))
+}
+
 rd_load_config() {
   local requested="${1:-}" candidate value
+  local disk_warn disk_fail memory_warn auth_failure_warn
+
   for candidate in "$requested" "${VPS_DOCTOR_CONFIG:-}" "/etc/vps-doctor/config.conf" "$ROOT_DIR/config/vps-doctor.conf"; do
     [[ -n "$candidate" && -r "$candidate" ]] || continue
     RD_CONFIG_FILE="$candidate"
-    value="$(rd_config_value "$candidate" DOMAINS || true)"; [[ -z "$value" ]] || RD_DOMAINS="$value"
-    value="$(rd_config_value "$candidate" DISK_WARN || true)"; [[ "$value" =~ ^[0-9]+$ ]] && RD_DISK_WARN="$value"
-    value="$(rd_config_value "$candidate" DISK_FAIL || true)"; [[ "$value" =~ ^[0-9]+$ ]] && RD_DISK_FAIL="$value"
-    value="$(rd_config_value "$candidate" MEMORY_WARN || true)"; [[ "$value" =~ ^[0-9]+$ ]] && RD_MEMORY_WARN="$value"
-    value="$(rd_config_value "$candidate" AUTH_FAILURE_WARN || true)"; [[ "$value" =~ ^[0-9]+$ ]] && RD_AUTH_FAILURE_WARN="$value"
+
+    value="$(rd_config_value "$candidate" DOMAINS || true)"
+    [[ -z "$value" ]] || RD_DOMAINS="$value"
+
+    disk_warn="$(rd_config_value "$candidate" DISK_WARN || true)"
+    disk_fail="$(rd_config_value "$candidate" DISK_FAIL || true)"
+    memory_warn="$(rd_config_value "$candidate" MEMORY_WARN || true)"
+    auth_failure_warn="$(rd_config_value "$candidate" AUTH_FAILURE_WARN || true)"
+
+    if [[ -n "$disk_warn" || -n "$disk_fail" ]]; then
+      [[ -n "$disk_warn" ]] || disk_warn="$RD_DISK_WARN"
+      [[ -n "$disk_fail" ]] || disk_fail="$RD_DISK_FAIL"
+      if rd_valid_percent "$disk_warn" && rd_valid_percent "$disk_fail" && ((disk_warn < disk_fail)); then
+        RD_DISK_WARN="$disk_warn"
+        RD_DISK_FAIL="$disk_fail"
+      else
+        rd_warn "Ignoring invalid disk thresholds in $candidate; require 1-100 and DISK_WARN < DISK_FAIL"
+      fi
+    fi
+
+    if [[ -n "$memory_warn" ]]; then
+      if rd_valid_percent "$memory_warn"; then
+        RD_MEMORY_WARN="$memory_warn"
+      else
+        rd_warn "Ignoring invalid MEMORY_WARN in $candidate; require a percentage from 1 to 100"
+      fi
+    fi
+
+    if [[ -n "$auth_failure_warn" ]]; then
+      if rd_valid_positive_integer "$auth_failure_warn"; then
+        RD_AUTH_FAILURE_WARN="$auth_failure_warn"
+      else
+        rd_warn "Ignoring invalid AUTH_FAILURE_WARN in $candidate; require a positive integer"
+      fi
+    fi
+
     return 0
   done
 }
