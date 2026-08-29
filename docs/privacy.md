@@ -7,9 +7,13 @@ Reports apply best-effort redaction to:
 - the current username;
 - the current hostname;
 - IPv4-like strings;
-- assignments whose names contain `TOKEN`, `KEY`, `SECRET`, or `PASSWORD`.
+- full and bracketed IPv6 literals covered by the built-in patterns;
+- assignments whose names contain `TOKEN`, `KEY`, `SECRET`, or `PASSWORD`;
+- common `Authorization: Bearer ...`, `Authorization: Basic ...`, and standalone bearer-token forms.
 
-This does not cover every secret format, domain name, path, container name, customer identifier, IPv6 representation, application log, or data embedded in arbitrary command output.
+Standalone HTML reports also use a deny-by-default Content Security Policy and load no remote scripts, fonts, images, frames, or network resources.
+
+Redaction is defense in depth, not a guarantee. It does not cover every secret format, domain name, path, container name, customer identifier, abbreviated IPv6 representation, application log, or data embedded in arbitrary command output.
 
 Before attaching a report to an issue:
 

@@ -40,6 +40,8 @@ assert_contains "$html" 'example-fix' "HTML includes guarded fix reference"
 assert_contains "$html" '&lt;script&gt;alert(1)&lt;/script&gt;' "HTML escapes finding titles"
 assert_contains "$html" 'Unsafe &lt;b&gt;markup&lt;/b&gt; &amp; text' "HTML escapes finding summaries"
 assert_contains "$html" '&lt;img src=x onerror=alert(1)&gt;' "HTML escapes evidence"
+assert_contains "$html" "default-src 'none'" "HTML applies a deny-by-default content security policy"
+assert_contains "$html" "connect-src 'none'" "HTML forbids network connections"
 assert_not_contains "$html" '<script>alert(1)</script>' "HTML does not render injected script markup"
 assert_not_contains "$html" 'src="http' "HTML loads no remote assets"
 

@@ -150,7 +150,11 @@ rd_redact() {
   [[ -z "$host" ]] || text="${text//$host/[host]}"
   printf '%s' "$text" | sed -E \
     -e 's/([0-9]{1,3}\.){3}[0-9]{1,3}/[ip]/g' \
+    -e 's/([[:xdigit:]]{1,4}:){7}[[:xdigit:]]{1,4}/[ipv6]/g' \
+    -e 's/\[[[:xdigit:]:]{2,}\]/[ipv6]/g' \
     -e 's/([A-Za-z0-9_]*(TOKEN|KEY|SECRET|PASSWORD)[A-Za-z0-9_]*)=([^[:space:]]+)/\1=[redacted]/Ig' \
+    -e 's/(Authorization:[[:space:]]*(Bearer|Basic)[[:space:]]+)[A-Za-z0-9._~+\/=:-]+/\1[redacted]/Ig' \
+    -e 's/(Bearer[[:space:]]+)[A-Za-z0-9._~+\/=:-]{12,}/\1[redacted]/Ig' \
     | LC_ALL=C tr -d '\000-\010\013\014\016-\037'
 }
 
