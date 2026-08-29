@@ -66,12 +66,17 @@ sudo vps-doctor scan
 # Redacted machine-readable evidence
 sudo vps-doctor scan --format json --output report.json
 
-# Shareable support report
+# Shareable Markdown support report
 sudo vps-doctor scan --format markdown --output report.md
+
+# Standalone offline HTML incident report
+sudo vps-doctor scan --format html --output report.html
 
 # Monitoring/automation gate
 sudo vps-doctor scan --quick --fail-under 75
 ```
+
+HTML reports are self-contained and load no third-party scripts, fonts, trackers, or other remote assets. System-derived text is escaped before it is embedded in the page.
 
 Exit code `0` means the scan completed and met the optional threshold, `1` means usage/runtime failure, and `2` means the score was below `--fail-under`.
 
@@ -89,7 +94,7 @@ VPS Doctor intentionally refuses risky guesses. For example, it will not auto-me
 
 ## Privacy
 
-There is no telemetry. Terminal, JSON, and Markdown reports redact the current username, hostname, IPv4-like values, and common secret assignments. Redaction is defense in depth, not a guarantee; always review a report before publishing it. Details are in [docs/privacy.md](docs/privacy.md).
+There is no telemetry. Terminal, JSON, Markdown, and HTML reports redact the current username, hostname, IPv4-like values, and common secret assignments. Redaction is defense in depth, not a guarantee; always review a report before publishing it. Details are in [docs/privacy.md](docs/privacy.md).
 
 ## Supported systems
 
