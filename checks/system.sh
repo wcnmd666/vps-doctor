@@ -2,16 +2,17 @@
 
 check_system() {
   local os_id="unknown" os_name="Unknown Linux" load1="0" cpus=1 limit status summary sync_state
-  if [[ -r /etc/os-release ]]; then
-    os_id="$(grep -E '^ID=' /etc/os-release | head -n1 | cut -d= -f2- | tr -d '"' || true)"
-    os_name="$(grep -E '^PRETTY_NAME=' /etc/os-release | head -n1 | cut -d= -f2- | tr -d '"' || true)"
+  local etc_root="${RD_ETC_ROOT:-/etc}" proc_root="${RD_PROC_ROOT:-/proc}"
+  if [[ -r "$etc_root/os-release" ]]; then
+    os_id="$(grep -E '^ID=' "$etc_root/os-release" | head -n1 | cut -d= -f2- | tr -d '"' || true)"
+    os_name="$(grep -E '^PRETTY_NAME=' "$etc_root/os-release" | head -n1 | cut -d= -f2- | tr -d '"' || true)"
   fi
   case "$os_id" in
     ubuntu|debian) rd_add_result "SYS-001" "System" "pass" "info" "Supported operating system" "$os_name is supported." "$os_id" "" "" ;;
     *) rd_add_result "SYS-001" "System" "warn" "low" "Operating system compatibility" "$os_name has not been validated by this release." "$os_id" "Use Ubuntu 20.04+ or Debian 11+ for tested behavior." "" ;;
   esac
 
-  [[ -r /proc/loadavg ]] && load1="$(awk '{print $1}' /proc/loadavg)"
+  [[ -r "$proc_root/loadavg" ]] && load1="$(awk '{print $1}' "$proc_root/loadavg")"
   rd_command_exists nproc && cpus="$(nproc 2>/dev/null || printf 1)"
   [[ "$cpus" =~ ^[0-9]+$ && "$cpus" -gt 0 ]] || cpus=1
   limit="$(awk -v c="$cpus" 'BEGIN { printf "%.2f", c*1.5 }')"
