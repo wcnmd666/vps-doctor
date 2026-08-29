@@ -6,6 +6,8 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+  attestations: write
 
 concurrency:
   group: release-${{ github.ref }}
@@ -28,6 +30,10 @@ jobs:
           archive="$(awk '{print $2}' SHA256SUMS | head -n1)"
           [[ -n "$archive" && -f "$archive" ]]
           tar -tzf "$archive" >/dev/null
+      - name: Attest release archive provenance
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3
+        with:
+          subject-path: dist/vps-doctor-*.tar.gz
       - name: Publish release artifacts
         env:
           GH_TOKEN: ${{ github.token }}
