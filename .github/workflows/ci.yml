@@ -9,10 +9,15 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     name: Bash ${{ matrix.bash }}
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
@@ -32,6 +37,7 @@ jobs:
   shellcheck:
     name: ShellCheck
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - name: Install ShellCheck
@@ -42,6 +48,7 @@ jobs:
   smoke:
     name: Ubuntu smoke scan
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - name: Run read-only quick scan
@@ -52,3 +59,5 @@ jobs:
         with:
           name: smoke-report
           path: report.json
+          if-no-files-found: error
+          retention-days: 7
