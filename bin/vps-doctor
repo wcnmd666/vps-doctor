@@ -48,8 +48,9 @@ Usage:
   vps-doctor version              Print version
 
 Scan options:
-  --format terminal|json|markdown Output format (default: terminal)
-  --output PATH                   Write JSON/Markdown report to PATH
+  --format terminal|json|markdown|html
+                                  Output format (default: terminal)
+  --output PATH                   Write JSON/Markdown/HTML report to PATH
   --quick                         Skip slower web and log checks
   --no-color                      Disable ANSI colors
   --fail-under SCORE              Exit 2 when health score is below SCORE
@@ -62,6 +63,7 @@ Fix options:
 Examples:
   vps-doctor scan
   vps-doctor scan --format json --output report.json
+  vps-doctor scan --format html --output report.html
   vps-doctor fix vacuum-journal --dry-run
 EOF
 }
@@ -81,7 +83,7 @@ run_scan() {
     esac
   done
 
-  case "$format" in terminal|json|markdown) ;; *) rd_die "Unsupported format: $format" ;; esac
+  case "$format" in terminal|json|markdown|html) ;; *) rd_die "Unsupported format: $format" ;; esac
   [[ -z "$fail_under" || "$fail_under" =~ ^[0-9]+$ ]] || rd_die "--fail-under must be an integer"
   [[ -z "$config" || -r "$config" ]] || rd_die "Cannot read config: $config"
 
@@ -105,6 +107,7 @@ run_scan() {
     terminal) rd_report_terminal ;;
     json) rd_report_json "${output:--}" ;;
     markdown) rd_report_markdown "${output:--}" ;;
+    html) rd_report_html "${output:--}" ;;
   esac
 
   if [[ -n "$output" && "$format" == "terminal" ]]; then
