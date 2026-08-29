@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 rd_sshd_value() {
-  local key="$1" value=""
+  local key="$1" value="" etc_root="${RD_ETC_ROOT:-/etc}"
   if rd_command_exists sshd; then value="$(sshd -T 2>/dev/null | awk -v k="$key" '$1==k {print $2; exit}' || true)"; fi
   if [[ -z "$value" ]]; then
-    value="$(grep -Ehi "^[[:space:]]*${key}[[:space:]]+" /etc/ssh/sshd_config /etc/ssh/sshd_config.d/*.conf 2>/dev/null | tail -n1 | awk '{print tolower($2)}' || true)"
+    value="$(grep -Ehi "^[[:space:]]*${key}[[:space:]]+" "$etc_root/ssh/sshd_config" "$etc_root"/ssh/sshd_config.d/*.conf 2>/dev/null | tail -n1 | awk '{print tolower($2)}' || true)"
   fi
   printf '%s' "$value"
 }
