@@ -15,6 +15,10 @@ assert_eq "1.0 GiB" "$(rd_human_kib 1048576)" "formats GiB values"
 assert_eq "2.0 MiB" "$(rd_human_kib 2048)" "formats MiB values"
 assert_contains "$(rd_redact 'API_SECRET=hunter2')" "API_SECRET=[redacted]" "redacts secret assignments"
 assert_contains "$(rd_redact 'peer 203.0.113.42 failed')" "peer [ip] failed" "redacts IPv4-like values"
+assert_contains "$(rd_redact 'peer 2001:0db8:0000:0000:0000:ff00:0042:8329 failed')" "peer [ipv6] failed" "redacts full IPv6 literals"
+assert_contains "$(rd_redact 'listen [2001:db8::1]:443')" "listen [ipv6]:443" "redacts bracketed IPv6 literals"
+assert_contains "$(rd_redact 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.payload.signature')" "Authorization: Bearer [redacted]" "redacts bearer authorization headers"
+assert_contains "$(rd_redact 'Bearer abcdefghijklmnop')" "Bearer [redacted]" "redacts standalone bearer tokens"
 
 rd_results_reset
 rd_add_result X-001 Test pass info Pass "pass" "" "" ""
