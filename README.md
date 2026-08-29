@@ -44,7 +44,7 @@ For disposable testing, the installer can also be fetched directly:
 curl -fsSL https://raw.githubusercontent.com/wcnmd666/vps-doctor/main/install.sh | sudo bash
 ```
 
-For production use, download a tagged release, verify its checksum, inspect the installer, and install from the verified local checkout. See [release verification](docs/release-verification.md). Piping mutable remote content directly to root is convenient for demos but is not the recommended trust path.
+For production use, download a tagged release, verify its checksum and GitHub build provenance, inspect the installer, and install from the verified local checkout. See [release verification](docs/release-verification.md). Piping mutable remote content directly to root is convenient for demos but is not the recommended trust path.
 
 ## What it checks
 
@@ -76,7 +76,7 @@ sudo vps-doctor scan --format html --output report.html
 sudo vps-doctor scan --quick --fail-under 75
 ```
 
-HTML reports are self-contained and load no third-party scripts, fonts, trackers, or other remote assets. System-derived text is escaped before it is embedded in the page.
+HTML reports are self-contained, escape system-derived text, use a restrictive Content Security Policy, and load no third-party scripts, fonts, trackers, or other remote assets.
 
 Exit code `0` means the scan completed and met the optional threshold, `1` means usage/runtime failure, and `2` means the score was below `--fail-under`.
 
@@ -94,7 +94,7 @@ VPS Doctor intentionally refuses risky guesses. For example, it will not auto-me
 
 ## Privacy
 
-There is no telemetry. Terminal, JSON, Markdown, and HTML reports redact the current username, hostname, IPv4-like values, and common secret assignments. Redaction is defense in depth, not a guarantee; always review a report before publishing it. Details are in [docs/privacy.md](docs/privacy.md).
+There is no telemetry. Terminal, JSON, Markdown, and HTML reports apply best-effort redaction to the current username, hostname, IPv4-like values, representative IPv6 forms, common secret assignments, and common Authorization/Bearer credentials. Redaction is defense in depth, not a guarantee; always review a report before publishing it. Details are in [docs/privacy.md](docs/privacy.md).
 
 ## Supported systems
 
@@ -109,7 +109,7 @@ Requires Bash 4.4 or newer. Individual checks degrade gracefully when optional c
 
 ## Project status
 
-`v0.1.0` is an initial public preview. Reports and findings are diagnostic evidence, not a security certification. Please test fixes on disposable infrastructure and report false positives with a redacted JSON report.
+`v0.2.0` focuses on reproducible incident evidence and safer maintenance: offline HTML reports, validated configuration and auditable exclusions, deterministic integration fixtures, hardened CI/release workflows, verifiable release provenance, and stronger report privacy controls. Reports and findings remain diagnostic evidence, not a security certification. Test repairs on disposable infrastructure and report false positives with a reviewed, redacted report.
 
 ## Contributing and security
 
