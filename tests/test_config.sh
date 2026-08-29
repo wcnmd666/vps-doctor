@@ -6,7 +6,6 @@ source "$ROOT_DIR/tests/testlib.sh"
 source "$ROOT_DIR/lib/core.sh"
 
 reset_thresholds() {
-  RD_CONFIG_FILE=""
   RD_DOMAINS=""
   RD_DISK_WARN=85
   RD_DISK_FAIL=95
