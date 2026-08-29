@@ -12,10 +12,10 @@ The roadmap favors reliable evidence over feature count. Items graduate only aft
 
 ## v0.2 — Reproducible incident evidence
 
-- [ ] Single-file HTML report with collapsible evidence
+- [x] Single-file HTML report with collapsible evidence
 - [ ] Before/after comparison for two scan reports
-- [ ] Configurable rule thresholds and rule exclusions with reasons
-- [ ] Fixture-driven Ubuntu/Debian integration scenarios
+- [x] Configurable rule thresholds and rule exclusions with reasons
+- [x] Fixture-driven Ubuntu/Debian integration scenarios
 - [ ] Signed release checksums and package verification guide
 
 ## v0.3 — Maintainer workflows
