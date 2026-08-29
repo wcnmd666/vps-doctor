@@ -2,7 +2,7 @@
   <img src="docs/assets/logo.svg" width="110" alt="VPS Doctor 标志">
   <h1>VPS Doctor</h1>
   <p><strong>一条命令诊断常见 VPS 故障，然后安全地修复。</strong></p>
-  <p><a href="README.md">English</a> · <a href="docs/rules.md">检查规则</a> · <a href="docs/repairs.md">修复安全</a> · <a href="ROADMAP.md">路线图</a></p>
+  <p><a href="README.md">English</a> · <a href="docs/rules.md">检查规则</a> · <a href="docs/repairs.md">修复安全</a> · <a href="docs/release-verification.md">Release 校验</a> · <a href="ROADMAP.md">路线图</a></p>
 </div>
 
 ![VPS Doctor 终端演示](docs/assets/terminal-demo.svg)
@@ -26,13 +26,13 @@ sudo bash ./install.sh
 sudo vps-doctor scan
 ```
 
-项目发布后，可以使用一条命令安装：
+临时测试环境也可以直接获取安装脚本：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/wcnmd666/vps-doctor/main/install.sh | sudo bash
 ```
 
-正式服务器建议下载带版本号的 Release、核对校验值并阅读安装脚本后再执行，不建议盲目信任任何通过网络直接传给 root 的脚本。
+正式服务器建议下载带版本号的 Release 与同一 Release 中的 `SHA256SUMS`，先核对校验值、阅读安装脚本，再从已验证的本地副本安装。详见 [Release 校验说明](docs/release-verification.md)。不建议在生产环境盲目信任任何通过网络直接传给 root 的可变脚本。
 
 ## 主要能力
 
