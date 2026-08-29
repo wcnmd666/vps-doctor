@@ -6,6 +6,7 @@
     <a href="README.zh-CN.md">简体中文</a> ·
     <a href="docs/rules.md">Diagnostic rules</a> ·
     <a href="docs/repairs.md">Repair safety</a> ·
+    <a href="docs/release-verification.md">Release verification</a> ·
     <a href="ROADMAP.md">Roadmap</a>
   </p>
   <p>
@@ -37,13 +38,13 @@ sudo bash ./install.sh
 sudo vps-doctor scan
 ```
 
-After publishing this repository:
+For disposable testing, the installer can also be fetched directly:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/wcnmd666/vps-doctor/main/install.sh | sudo bash
 ```
 
-For production use, download a tagged release, verify its checksum, inspect the installer, and then run it. Piping remote scripts directly to root is convenient for demos but is not the recommended trust path.
+For production use, download a tagged release, verify its checksum, inspect the installer, and install from the verified local checkout. See [release verification](docs/release-verification.md). Piping mutable remote content directly to root is convenient for demos but is not the recommended trust path.
 
 ## What it checks
 
