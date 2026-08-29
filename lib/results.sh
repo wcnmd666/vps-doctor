@@ -2,6 +2,7 @@
 
 declare -ag RD_IDS=() RD_CATEGORIES=() RD_STATUSES=() RD_SEVERITIES=()
 declare -ag RD_TITLES=() RD_SUMMARIES=() RD_EVIDENCE=() RD_RECOMMENDATIONS=() RD_FIXES=()
+declare -Ag RD_EXCLUSIONS=()
 RD_SCORE=100
 RD_PASS_COUNT=0
 RD_WARN_COUNT=0
@@ -14,10 +15,29 @@ rd_results_reset() {
   RD_SCORE=100; RD_PASS_COUNT=0; RD_WARN_COUNT=0; RD_FAIL_COUNT=0; RD_INFO_COUNT=0
 }
 
+rd_known_rule_id() {
+  case "$1" in
+    SYS-001|SYS-002|SYS-003|STO-001|STO-002|STO-003|MEM-001|MEM-002|MEM-003|SVC-001|SVC-002|NET-001|NET-002|NET-003|SEC-001|SEC-002|SEC-003|SEC-004|SEC-005|CTR-001|CTR-002|CTR-003|WEB-001|WEB-002) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 rd_add_result() {
-  RD_IDS+=("$1"); RD_CATEGORIES+=("$2"); RD_STATUSES+=("$3"); RD_SEVERITIES+=("$4")
-  RD_TITLES+=("$5"); RD_SUMMARIES+=("$6"); RD_EVIDENCE+=("${7:-}")
-  RD_RECOMMENDATIONS+=("${8:-}"); RD_FIXES+=("${9:-}")
+  local id="$1" category="$2" status="$3" severity="$4" title="$5"
+  local summary="$6" evidence="${7:-}" recommendation="${8:-}" fix="${9:-}"
+
+  if [[ -n "${RD_EXCLUSIONS[$id]:-}" ]]; then
+    status="skip"
+    severity="info"
+    summary="Excluded by configuration: ${RD_EXCLUSIONS[$id]}"
+    evidence=""
+    recommendation=""
+    fix=""
+  fi
+
+  RD_IDS+=("$id"); RD_CATEGORIES+=("$category"); RD_STATUSES+=("$status"); RD_SEVERITIES+=("$severity")
+  RD_TITLES+=("$title"); RD_SUMMARIES+=("$summary"); RD_EVIDENCE+=("$evidence")
+  RD_RECOMMENDATIONS+=("$recommendation"); RD_FIXES+=("$fix")
 }
 
 rd_penalty() {
