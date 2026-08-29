@@ -7,12 +7,12 @@ rd_json_escape() {
 }
 
 rd_html_escape() {
-  local s="$1"
-  s=${s//&/&amp;}
-  s=${s//</&lt;}
-  s=${s//>/&gt;}
-  s=${s//\"/&quot;}
-  printf '%s' "$s"
+  printf '%s' "$1" | sed \
+    -e 's/&/\&amp;/g' \
+    -e 's/</\&lt;/g' \
+    -e 's/>/\&gt;/g' \
+    -e 's/"/\&quot;/g' \
+    -e "s/'/\&#39;/g"
 }
 
 rd_save_report() {
