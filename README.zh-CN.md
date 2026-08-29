@@ -32,7 +32,7 @@ sudo vps-doctor scan
 curl -fsSL https://raw.githubusercontent.com/wcnmd666/vps-doctor/main/install.sh | sudo bash
 ```
 
-正式服务器建议下载带版本号的 Release 与同一 Release 中的 `SHA256SUMS`，先核对校验值、阅读安装脚本，再从已验证的本地副本安装。详见 [Release 校验说明](docs/release-verification.md)。不建议在生产环境盲目信任任何通过网络直接传给 root 的可变脚本。
+正式服务器建议下载带版本号的 Release 与同一 Release 中的 `SHA256SUMS`，核对校验值和 GitHub 构建来源证明，阅读安装脚本后再从已验证的本地副本安装。详见 [Release 校验说明](docs/release-verification.md)。不建议在生产环境盲目信任任何通过网络直接传给 root 的可变脚本。
 
 ## 主要能力
 
@@ -42,7 +42,8 @@ curl -fsSL https://raw.githubusercontent.com/wcnmd666/vps-doctor/main/install.sh
 - 检查防火墙、SSH 策略、暴力登录记录和自动安全更新；
 - 检查 Docker 服务、异常容器和过大的容器日志；
 - 检查 Nginx、Apache、Caddy，以及可选的域名和 TLS 证书；
-- 输出终端、JSON 或 Markdown 报告；
+- 输出终端、JSON、Markdown 和独立离线 HTML 报告；
+- 支持可验证阈值配置与带原因的规则排除；
 - 每项问题都有固定规则编号、证据、严重程度和建议。
 
 ## 常用命令
@@ -52,8 +53,11 @@ sudo vps-doctor scan
 sudo vps-doctor scan --quick
 sudo vps-doctor scan --format json --output report.json
 sudo vps-doctor scan --format markdown --output report.md
+sudo vps-doctor scan --format html --output report.html
 sudo vps-doctor scan --fail-under 75
 ```
+
+HTML 报告完全离线，系统来源文本会先转义，并使用严格的 Content Security Policy，不加载第三方脚本、字体、跟踪器或其他远程资源。
 
 ## 安全修复
 
@@ -70,10 +74,12 @@ sudo vps-doctor fix create-swap --size 2G
 
 ## 隐私
 
-项目没有遥测。报告会尝试隐藏当前用户名、主机名、IPv4 地址和常见密钥赋值，但自动脱敏不可能覆盖所有情况，公开报告前仍需人工检查。详见 [隐私说明](docs/privacy.md)。
+项目没有遥测。终端、JSON、Markdown 与 HTML 报告会尽力隐藏当前用户名、主机名、IPv4、部分常见 IPv6 形式、常见密钥赋值以及常见 Authorization/Bearer 凭证。自动脱敏属于纵深防御，不可能覆盖所有情况，公开报告前仍需人工检查。详见 [隐私说明](docs/privacy.md)。
 
 ## 支持范围
 
-首版重点支持 Ubuntu 20.04/22.04/24.04 和 Debian 11/12/13；其他使用 systemd 的 Linux 会以尽力而为方式运行。需要 Bash 4.4 或更高版本。
+重点支持 Ubuntu 20.04/22.04/24.04 和 Debian 11/12/13；其他使用 systemd 的 Linux 会以尽力而为方式运行。需要 Bash 4.4 或更高版本。
 
-当前版本为 `v0.1.0` 预览版。诊断结果不是安全认证，请先在临时服务器测试修复功能。
+## 项目状态
+
+`v0.2.0` 重点增强“可复现诊断证据”和维护安全性：加入离线 HTML 报告、配置校验与可审计规则排除、Ubuntu/Debian 确定性测试场景、强化后的 CI/Release 流程、可验证的 Release 构建来源以及更严格的报告隐私保护。诊断结果仍然不是安全认证，请先在临时服务器验证修复功能。

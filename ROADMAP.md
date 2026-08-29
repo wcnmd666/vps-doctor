@@ -12,14 +12,16 @@ The roadmap favors reliable evidence over feature count. Items graduate only aft
 
 ## v0.2 — Reproducible incident evidence
 
-- [x] Single-file HTML report with collapsible evidence
-- [ ] Before/after comparison for two scan reports
+- [x] Single-file offline HTML report with collapsible evidence
 - [x] Configurable rule thresholds and rule exclusions with reasons
-- [x] Fixture-driven Ubuntu/Debian integration scenarios
-- [ ] Signed release checksums and package verification guide
+- [x] Fixture-driven Ubuntu/Debian integration scenarios across core rule categories
+- [x] Verifiable release artifacts with SHA-256 guidance and GitHub build provenance
+- [x] CI/release hardening with bounded jobs, concurrency controls, and immutable Action pins
+- [x] Expanded report redaction and HTML containment
 
-## v0.3 — Maintainer workflows
+## v0.3 — Maintainer workflows and report evolution
 
+- [ ] Before/after comparison for two scan reports
 - [ ] GitHub Issue report template generated from a redacted scan
 - [ ] SARIF output for stable infrastructure findings
 - [ ] Plugin contract for community diagnostic rules
